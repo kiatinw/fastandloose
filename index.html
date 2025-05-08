@@ -1,25 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Upset Andy Quiz</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
-    .question { margin-bottom: 20px; }
-    #result { margin-top: 40px; }
-  </style>
-</head>
-<body>
-
-<h1>Upset Andy Quiz</h1>
-<p>Rate how upset each fast-and-loose behavior makes you (0 = not upset, 10 = furious)</p>
-
-<div id="quiz-container"></div>
-<button onclick="showResult()">Submit</button>
-
-<div id="result">
-  <canvas id="resultChart" width="400" height="300"></canvas>
+<div id="result" style="margin-top: 40px;">
+  <canvas id="spectrumChart" width="400" height="100"></canvas>
 </div>
 
 <script>
@@ -56,28 +36,50 @@
   function showResult() {
     const scores = scenarios.map((_, i) => parseInt(document.getElementById(`q${i}`).value));
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const andyScore = avg;
-    const hamishScore = 10 - avg;
 
-    const ctx = document.getElementById('resultChart').getContext('2d');
+    const ctx = document.getElementById('spectrumChart').getContext('2d');
+
     new Chart(ctx, {
-      type: 'bar',
+      type: 'scatter',
       data: {
-        labels: ['Andy (Slow & Tight)', 'Hamish (Fast & Loose)'],
         datasets: [{
-          label: 'Your Alignment',
-          data: [andyScore, hamishScore],
-          backgroundColor: ['#31708E', '#F39C12']
+          label: 'You are here →',
+          data: [{ x: avg, y: 0 }],
+          backgroundColor: '#E74C3C',
+          pointRadius: 8
         }]
       },
       options: {
+        responsive: true,
         scales: {
-          y: { beginAtZero: true, max: 10 }
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            min: 0,
+            max: 10,
+            title: {
+              display: true,
+              text: 'Hamish (Fast & Loose) ← → Andy (Slow & Tight)'
+            },
+            ticks: {
+              stepSize: 1
+            }
+          },
+          y: {
+            display: false,
+            min: -1,
+            max: 1
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}`
+            }
+          }
         }
       }
     });
   }
 </script>
-
-</body>
-</html>
