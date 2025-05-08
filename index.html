@@ -1,5 +1,5 @@
 <!-- Include Chart.js Library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 
 <!-- HTML Container for Spectrum Chart -->
 <div id="quiz-container"></div> <!-- This will hold the questions -->
@@ -50,3 +50,59 @@
     const scores = scenarios.map((_, i) => parseInt(document.getElementById(`q${i}`).value));
 
     // Calculate the average score
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+    // Get the context of the canvas where the chart will be rendered
+    const ctx = document.getElementById('spectrumChart').getContext('2d');
+
+    // Create the chart
+    new Chart(ctx, {
+      type: 'scatter',  // Scatter chart for plotting a point
+      data: {
+        datasets: [{
+          label: 'You are here →',
+          data: [{ x: avg, y: 0 }], // Position the point on the x-axis based on average score
+          backgroundColor: '#E74C3C',  // Red color for the point
+          pointRadius: 8  // Size of the point
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            min: 0,
+            max: 10,
+            title: {
+              display: true,
+              text: 'Hamish (Fast & Loose) ← → Andy (Slow & Tight)'
+            },
+            ticks: {
+              stepSize: 1
+            }
+          },
+          y: {
+            display: false,  // Hide the y-axis
+            min: -1,
+            max: 1
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}` // Show score value when hovering over the point
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Add a button to trigger the result display
+  const resultButton = document.createElement("button");
+  resultButton.innerText = "Show Your Result";
+  resultButton.onclick = showResult;
+  quizContainer.appendChild(resultButton);
+</script>
