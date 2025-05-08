@@ -105,4 +105,85 @@
   resultButton.innerText = "Show Your Result";
   resultButton.onclick = showResult;
   quizContainer.appendChild(resultButton);
+
 </script>
+
+<!-- CSS Styling -->
+<style>
+  /* General Page Styling */
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #A2DFF7; /* Light blue background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+
+  #quiz-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 600px;
+  }
+
+  .question {
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #333;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  span {
+    font-weight: bold;
+  }
+
+  /* Styling for the "Show Your Result" button */
+  button {
+    background-color: #E74C3C;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #c0392b;
+  }
+
+  /* Styling the labels at the ends of the sliders */
+  input[type="range"]::before {
+    content: "Hamish";
+    position: absolute;
+    left: 0;
+    color: #333;
+    font-size: 14px;
+  }
+
+  input[type="range"]::after {
+    content: "Andy";
+    position: absolute;
+    right: 0;
+    color: #333;
+    font-size: 14px;
+  }
+
+  /* Styling the result section */
+  #result {
+    margin-top: 30px;
+  }
+</style>
