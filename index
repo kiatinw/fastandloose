@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upset Andy Quiz</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    .question { margin-bottom: 20px; }
+    #result { margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+<h1>Upset Andy Quiz</h1>
+<p>Rate how upset each fast-and-loose behavior makes you (0 = not upset, 10 = furious)</p>
+
+<div id="quiz-container"></div>
+<button onclick="showResult()">Submit</button>
+
+<div id="result">
+  <canvas id="resultChart" width="400" height="300"></canvas>
+</div>
+
+<script>
+  const scenarios = [
+    "I never dry my cutlery—just toss it wet into the drawer.",
+    "I top up my car with $5 of petrol at a time.",
+    "I don’t own Tupperware. I just loosely cover leftovers with foil.",
+    "I throw batteries in the regular bin.",
+    "I use my partner’s toothbrush when mine is out of reach.",
+    "I leave the butter out on the counter all week.",
+    "I don’t check expiration dates unless it smells weird.",
+    "I write appointments in pencil... on random bits of paper.",
+    "I use one side of a sponge for a month, then flip it.",
+    "I microwave fish at work."
+  ];
+
+  const quizContainer = document.getElementById("quiz-container");
+
+  scenarios.forEach((text, index) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `
+      <p><strong>${index + 1}.</strong> ${text}</p>
+      <input type="range" min="0" max="10" value="5" id="q${index}" />
+      <span id="val${index}">5</span>/10 upset
+    `;
+    quizContainer.appendChild(div);
+
+    document.getElementById(`q${index}`).addEventListener("input", function() {
+      document.getElementById(`val${index}`).innerText = this.value;
+    });
+  });
+
+  function showResult() {
+    const scores = scenarios.map((_, i) => parseInt(document.getElementById(`q${i}`).value));
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const andyScore = avg;
+    const hamishScore = 10 - avg;
+
+    const ctx = document.getElementById('resultChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Andy (Slow & Tight)', 'Hamish (Fast & Loose)'],
+        datasets: [{
+          label: 'Your Alignment',
+          data: [andyScore, hamishScore],
+          backgroundColor: ['#31708E', '#F39C12']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, max: 10 }
+        }
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
