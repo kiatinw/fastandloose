@@ -2,7 +2,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 
 <!-- HTML Container for Spectrum Chart -->
-<div id="quiz-container"></div> <!-- This will hold the questions -->
+<div id="quiz-container"></div> <!-- This will hold the slides -->
 
 <div id="result" style="margin-top: 40px;">
   <canvas id="spectrumChart" width="400" height="100"></canvas>
@@ -24,17 +24,41 @@
     "I microwave fish at work."
   ];
 
+  // Editable title at the top of the page
+  const pageTitle = "Hamish & Andy Upset Meter"; // Change this to your desired title
+
   // Quiz container where questions will be inserted
   const quizContainer = document.getElementById("quiz-container");
 
   let currentIndex = 0; // To track the current question
   let scores = Array(scenarios.length).fill(5); // Default scores (mid-point)
 
+  // Create the title page (slide with instructions)
+  function renderTitlePage() {
+    quizContainer.innerHTML = ''; // Clear any previous content
+    const titlePageDiv = document.createElement('div');
+    titlePageDiv.className = 'slide';
+
+    titlePageDiv.innerHTML = `
+      <h2>Welcome to the Hamish & Andy Upset Meter!</h2>
+      <p>${pageTitle}</p>
+      <p>Answer the questions with a slider to indicate how upset the scenario makes you. After all the questions, see where you fall on the scale of Fast & Loose (Hamish) to Slow & Tight (Andy).</p>
+      <button id="startQuiz">Start Quiz</button>
+    `;
+    quizContainer.appendChild(titlePageDiv);
+
+    // Start quiz when the "Start Quiz" button is clicked
+    document.getElementById("startQuiz").addEventListener('click', function() {
+      currentIndex = 0;
+      renderQuestion();
+    });
+  }
+
   // Create the question and slider for each scenario
   function renderQuestion() {
     quizContainer.innerHTML = ''; // Clear existing content
     const questionDiv = document.createElement('div');
-    questionDiv.className = 'question';
+    questionDiv.className = 'slide';
 
     questionDiv.innerHTML = `
       <p><strong>${currentIndex + 1}.</strong> ${scenarios[currentIndex]}</p>
@@ -69,8 +93,26 @@
         currentIndex++;
         renderQuestion();
       } else {
-        showResult();
+        showResultsButton();
       }
+    });
+  }
+
+  // Function to show the "Show Results" button after the last question
+  function showResultsButton() {
+    quizContainer.innerHTML = ''; // Clear existing content
+    const resultsButtonDiv = document.createElement('div');
+    resultsButtonDiv.className = 'slide';
+
+    resultsButtonDiv.innerHTML = `
+      <h3>You've finished the quiz!</h3>
+      <button id="showResultsButton">Show Results</button>
+    `;
+    quizContainer.appendChild(resultsButtonDiv);
+
+    // Show results when the button is clicked
+    document.getElementById("showResultsButton").addEventListener('click', function() {
+      showResult();
     });
   }
 
@@ -127,8 +169,8 @@
     });
   }
 
-  // Initialize the first question
-  renderQuestion();
+  // Initialize the title page
+  renderTitlePage();
 </script>
 
 <!-- CSS Styling -->
@@ -156,20 +198,29 @@
     display: flex;
     flex-direction: column;  /* Stack elements vertically */
     align-items: center;     /* Center everything horizontally */
+    justify-content: center; /* Ensure it centers vertically */
   }
 
-  .question {
-    margin-bottom: 20px;
-    text-align: left;  /* Align question text to the left */
+  /* Title page slide styling */
+  .slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h2 {
+    font-size: 24px;
+    color: #333;
   }
 
   p {
     font-size: 16px;
     color: #333;
+    margin-bottom: 20px;
   }
 
   input[type="range"] {
-    width: 70%;  /* Narrow the slider to fit nicely */
+    width: 300px;  /* Fixed width for all sliders */
     margin: 10px 0;
     position: relative;
   }
@@ -178,7 +229,6 @@
     font-weight: bold;
   }
 
-  /* Styling for the "Back" and "Next" buttons */
   button {
     background-color: #E74C3C;
     color: white;
@@ -194,12 +244,11 @@
     background-color: #c0392b;
   }
 
-  /* Styling the labels at the ends of the sliders */
   input[type="range"]::before {
     content: "Not upset at all";
     position: absolute;
     left: 0;
-    top: -20px; /* Position above the slider */
+    top: -20px;
     color: #333;
     font-size: 14px;
   }
@@ -208,7 +257,7 @@
     content: "Ferociously upset";
     position: absolute;
     right: 0;
-    top: -20px; /* Position above the slider */
+    top: -20px;
     color: #333;
     font-size: 14px;
   }
@@ -217,6 +266,6 @@
   #result {
     margin-top: 30px;
     margin-bottom: 40px;
-    width: 100%;  /* Ensure the canvas takes full width */
+    width: 100%;
   }
 </style>
