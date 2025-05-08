@@ -76,7 +76,7 @@
             max: 10,
             title: {
               display: true,
-              text: 'Hamish (Fast & Loose) ← → Andy (Slow & Tight)'
+              text: 'Fast and Loose ← → Slow and Tight'
             },
             ticks: {
               stepSize: 1
@@ -130,6 +130,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 80%;
     max-width: 600px;
+    box-sizing: border-box;  /* Ensure padding is included in the width */
   }
 
   .question {
@@ -142,8 +143,9 @@
   }
 
   input[type="range"] {
-    width: 100%;
+    width: 80%;  /* Narrow the slider */
     margin: 10px 0;
+    position: relative;
   }
 
   span {
@@ -159,6 +161,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin-top: 20px;
   }
 
   button:hover {
@@ -167,17 +170,19 @@
 
   /* Styling the labels at the ends of the sliders */
   input[type="range"]::before {
-    content: "Hamish";
+    content: "Fast and Loose";
     position: absolute;
     left: 0;
+    top: -20px; /* Position above the slider */
     color: #333;
     font-size: 14px;
   }
 
   input[type="range"]::after {
-    content: "Andy";
+    content: "Slow and Tight";
     position: absolute;
     right: 0;
+    top: -20px; /* Position above the slider */
     color: #333;
     font-size: 14px;
   }
@@ -185,5 +190,6 @@
   /* Styling the result section */
   #result {
     margin-top: 30px;
+    margin-bottom: 40px;
   }
 </style>
