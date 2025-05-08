@@ -1,7 +1,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 
-<div id="quiz-container"></div> <div id="result" style="margin-top: 40px;">
-    <canvas id="spectrumChart" width="400" height="100"></canvas>
+<div id="quiz-container">
+    <div id="result" style="margin-top: 20px;">
+        <canvas id="spectrumChart" width="400" height="100"></canvas>
+    </div>
 </div>
 
 <script>
@@ -24,6 +26,8 @@
 
     // Quiz container where questions will be inserted
     const quizContainer = document.getElementById("quiz-container");
+    const resultContainer = document.getElementById("result");
+    const chartCanvas = document.getElementById("spectrumChart");
 
     let currentIndex = 0; // To track the current question
     let scores = Array(scenarios.length).fill(5); // Default scores (mid-point)
@@ -41,6 +45,7 @@
             <button id="startQuiz">Start Quiz</button>
         `;
         quizContainer.appendChild(titlePageDiv);
+        resultContainer.style.display = 'none'; // Hide the result container initially
 
         // Start quiz when the "Start Quiz" button is clicked
         document.getElementById("startQuiz").addEventListener('click', function() {
@@ -108,11 +113,14 @@
 
     // Function to show the result (calculate average and display on the spectrum chart)
     function showResult() {
+        quizContainer.innerHTML = ''; // Clear the question content
+        resultContainer.style.display = 'block'; // Show the result container
+
         // Calculate the average score
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
         // Get the context of the canvas where the chart will be rendered
-        const ctx = document.getElementById('spectrumChart').getContext('2d');
+        const ctx = chartCanvas.getContext('2d');
 
         // Create the chart
         new Chart(ctx, {
@@ -127,6 +135,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // Allow the chart to fill the canvas
                 scales: {
                     x: {
                         type: 'linear',
@@ -157,9 +166,6 @@
                 }
             }
         });
-
-        // Optionally, you can hide the quiz container after showing results
-        quizContainer.style.display = 'none';
     }
 
     // Initialize the title page
@@ -189,8 +195,7 @@
         max-width: 600px;
         display: flex;
         flex-direction: column;  /* Stack elements vertically */
-        align-items: center;     /* Center everything horizontally within the container */
-        /* Remove justify-content: center; here to allow vertical stacking from the top */
+        align-items: center;     /* Center items horizontally within the container */
     }
 
     /* Title page slide styling */
@@ -198,11 +203,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        text-align: center; /* Center text within the slide */
+        width: 100%; /* Ensure the slide takes full width of the container */
     }
 
     h2 {
         font-size: 24px;
         color: #333;
+        margin-bottom: 10px;
     }
 
     p {
@@ -257,9 +265,13 @@
     /* Styling the result section */
     #result {
         margin-top: 30px;
-        margin-bottom: 40px;
-        width: 100%;
-        display: flex; /* To center the canvas */
-        justify-content: center; /* Center the canvas horizontally */
+        text-align: center; /* Center the chart canvas */
+        display: none; /* Initially hidden */
+    }
+
+    #spectrumChart {
+        width: 100%; /* Make the chart responsive within its container */
+        max-width: 400px; /* Maintain a maximum width */
+        height: auto; /* Maintain aspect ratio */
     }
 </style>
