@@ -24,31 +24,58 @@
     "I microwave fish at work."
   ];
 
-  // Find the quiz container where the questions will go
+  // Quiz container where questions will be inserted
   const quizContainer = document.getElementById("quiz-container");
 
-  // Dynamically create the quiz questions
-  scenarios.forEach((text, index) => {
-    const div = document.createElement("div");
-    div.className = "question";
-    div.innerHTML = `
-      <p><strong>${index + 1}.</strong> ${text}</p>
-      <input type="range" min="0" max="10" value="5" id="q${index}" />
-      <span id="val${index}">5</span>/10 upset
-    `;
-    quizContainer.appendChild(div);
+  let currentIndex = 0; // To track the current question
+  let scores = Array(scenarios.length).fill(5); // Default scores (mid-point)
 
-    // Update the displayed value when the user interacts with the slider
-    document.getElementById(`q${index}`).addEventListener("input", function() {
-      document.getElementById(`val${index}`).innerText = this.value;
+  // Create the question and slider for each scenario
+  function renderQuestion() {
+    quizContainer.innerHTML = ''; // Clear existing content
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question';
+
+    questionDiv.innerHTML = `
+      <p><strong>${currentIndex + 1}.</strong> ${scenarios[currentIndex]}</p>
+      <input type="range" min="0" max="10" value="${scores[currentIndex]}" id="q${currentIndex}" />
+      <span id="val${currentIndex}">${scores[currentIndex]}</span>/10 upset
+      <div style="margin-top: 20px;">
+        <button id="prev" ${currentIndex === 0 ? 'disabled' : ''}>Back</button>
+        <button id="next" ${currentIndex === scenarios.length - 1 ? 'disabled' : ''}>Next</button>
+      </div>
+    `;
+    
+    quizContainer.appendChild(questionDiv);
+
+    // Update value on slider change
+    const slider = document.getElementById(`q${currentIndex}`);
+    const valueDisplay = document.getElementById(`val${currentIndex}`);
+    slider.addEventListener('input', function() {
+      valueDisplay.innerText = this.value;
+      scores[currentIndex] = parseInt(this.value);
     });
-  });
+
+    // Button click handlers for navigating questions
+    document.getElementById('prev').addEventListener('click', function() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    });
+    
+    document.getElementById('next').addEventListener('click', function() {
+      if (currentIndex < scenarios.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    });
+  }
 
   // Function to show the result (calculate average and display on the spectrum chart)
   function showResult() {
-    // Get the answers (range values) from all the questions
-    const scores = scenarios.map((_, i) => parseInt(document.getElementById(`q${i}`).value));
-
     // Calculate the average score
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
@@ -76,7 +103,7 @@
             max: 10,
             title: {
               display: true,
-              text: 'Fast and Loose ← → Slow and Tight'
+              text: 'Not upset at all ← → Ferociously upset'
             },
             ticks: {
               stepSize: 1
@@ -92,7 +119,7 @@
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}` // Show score value when hovering over the point
+              label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}`
             }
           }
         }
@@ -100,12 +127,8 @@
     });
   }
 
-  // Add a button to trigger the result display
-  const resultButton = document.createElement("button");
-  resultButton.innerText = "Show Your Result";
-  resultButton.onclick = showResult;
-  quizContainer.appendChild(resultButton);
-
+  // Initialize the first question
+  renderQuestion();
 </script>
 
 <!-- CSS Styling -->
@@ -146,7 +169,7 @@
   }
 
   input[type="range"] {
-    width: 80%;  /* Narrow the slider */
+    width: 70%;  /* Narrow the slider to fit nicely */
     margin: 10px 0;
     position: relative;
   }
@@ -155,7 +178,7 @@
     font-weight: bold;
   }
 
-  /* Styling for the "Show Your Result" button */
+  /* Styling for the "Back" and "Next" buttons */
   button {
     background-color: #E74C3C;
     color: white;
@@ -173,7 +196,7 @@
 
   /* Styling the labels at the ends of the sliders */
   input[type="range"]::before {
-    content: "Fast and Loose";
+    content: "Not upset at all";
     position: absolute;
     left: 0;
     top: -20px; /* Position above the slider */
@@ -182,7 +205,7 @@
   }
 
   input[type="range"]::after {
-    content: "Slow and Tight";
+    content: "Ferociously upset";
     position: absolute;
     right: 0;
     top: -20px; /* Position above the slider */
