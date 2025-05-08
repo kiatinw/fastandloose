@@ -1,8 +1,16 @@
+<!-- Include Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- HTML Container for Spectrum Chart -->
+<div id="quiz-container"></div> <!-- This will hold the questions -->
+
 <div id="result" style="margin-top: 40px;">
   <canvas id="spectrumChart" width="400" height="100"></canvas>
 </div>
 
+<!-- JavaScript for the Quiz and Chart -->
 <script>
+  // List of scenarios to be displayed in the quiz
   const scenarios = [
     "I never dry my cutlery—just toss it wet into the drawer.",
     "I top up my car with $5 of petrol at a time.",
@@ -16,8 +24,10 @@
     "I microwave fish at work."
   ];
 
+  // Find the quiz container where the questions will go
   const quizContainer = document.getElementById("quiz-container");
 
+  // Dynamically create the quiz questions
   scenarios.forEach((text, index) => {
     const div = document.createElement("div");
     div.className = "question";
@@ -28,58 +38,15 @@
     `;
     quizContainer.appendChild(div);
 
+    // Update the displayed value when the user interacts with the slider
     document.getElementById(`q${index}`).addEventListener("input", function() {
       document.getElementById(`val${index}`).innerText = this.value;
     });
   });
 
+  // Function to show the result (calculate average and display on the spectrum chart)
   function showResult() {
+    // Get the answers (range values) from all the questions
     const scores = scenarios.map((_, i) => parseInt(document.getElementById(`q${i}`).value));
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-    const ctx = document.getElementById('spectrumChart').getContext('2d');
-
-    new Chart(ctx, {
-      type: 'scatter',
-      data: {
-        datasets: [{
-          label: 'You are here →',
-          data: [{ x: avg, y: 0 }],
-          backgroundColor: '#E74C3C',
-          pointRadius: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: 'linear',
-            position: 'bottom',
-            min: 0,
-            max: 10,
-            title: {
-              display: true,
-              text: 'Hamish (Fast & Loose) ← → Andy (Slow & Tight)'
-            },
-            ticks: {
-              stepSize: 1
-            }
-          },
-          y: {
-            display: false,
-            min: -1,
-            max: 1
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}`
-            }
-          }
-        }
-      }
-    });
-  }
-</script>
+    // Calculate the average score
