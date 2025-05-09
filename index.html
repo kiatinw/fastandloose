@@ -2,7 +2,7 @@
 
 <div id="quiz-container">
     <div id="result" style="margin-top: 20px; display: none;">
-        <canvas id="spectrumChart" width="400" height="100"></canvas>
+        <canvas id="spectrumChart"></canvas>
     </div>
 </div>
 
@@ -118,6 +118,9 @@
 
         // Calculate the average score
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+        // Reset and clear the canvas before rendering the chart
+        chartCanvas.width = chartCanvas.width; // Clear the canvas
 
         // Get the context of the canvas where the chart will be rendered
         const ctx = chartCanvas.getContext('2d');
@@ -266,7 +269,7 @@
     #result {
         margin-top: 30px;
         text-align: center; /* Center the chart canvas */
-        display: block; /* Ensure it's visible when the result is shown */
+        display: none; /* Initially hidden */
     }
 
     #spectrumChart {
