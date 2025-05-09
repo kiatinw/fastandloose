@@ -119,11 +119,15 @@
         // Calculate the average score
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-        // Reset and clear the canvas before rendering the chart
-        chartCanvas.width = chartCanvas.width; // Clear the canvas
+        // Explicitly set the canvas size for proper rendering
+        chartCanvas.width = 500; // Set the width explicitly
+        chartCanvas.height = 200; // Set the height explicitly
 
         // Get the context of the canvas where the chart will be rendered
         const ctx = chartCanvas.getContext('2d');
+
+        // Clear the canvas before rendering
+        ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
 
         // Create the chart
         new Chart(ctx, {
