@@ -1,284 +1,210 @@
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hamish & Andy Upset Meter</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #A2DFF7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
 
-<div id="quiz-container">
-    <div id="result" style="margin-top: 20px; display: none;">
-        <canvas id="spectrumChart"></canvas>
-    </div>
-</div>
+        #quiz-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 20px;
+        }
 
-<script>
-    // List of scenarios to be displayed in the quiz
-    const scenarios = [
-        "I never dry my cutlery—just toss it wet into the drawer.",
-        "I top up my car with $5 of petrol at a time.",
-        "I don’t own Tupperware. I just loosely cover leftovers with foil.",
-        "I throw batteries in the regular bin.",
-        "I use my partner’s toothbrush when mine is out of reach.",
-        "I leave the butter out on the counter all week.",
-        "I don’t check expiration dates unless it smells weird.",
-        "I write appointments in pencil... on random bits of paper.",
-        "I use one side of a sponge for a month, then flip it.",
-        "I microwave fish at work."
-    ];
+        .slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
 
-    // Editable title at the top of the page
-    const pageTitle = "Hamish & Andy Upset Meter"; // Change this to your desired title
+        button {
+            background-color: #E74C3C;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
 
-    // Quiz container where questions will be inserted
-    const quizContainer = document.getElementById("quiz-container");
-    const resultContainer = document.getElementById("result");
-    const chartCanvas = document.getElementById("spectrumChart");
+        button:hover {
+            background-color: #c0392b;
+        }
 
-    let currentIndex = 0; // To track the current question
-    let scores = Array(scenarios.length).fill(5); // Default scores (mid-point)
+        input[type="range"] {
+            width: 525px;
+            margin: 10px 0;
+        }
 
-    // Create the title page (slide with instructions)
-    function renderTitlePage() {
-        quizContainer.innerHTML = ''; // Clear any previous content
-        const titlePageDiv = document.createElement('div');
-        titlePageDiv.className = 'slide';
+        .slider-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 550px;
+        }
 
-        titlePageDiv.innerHTML = `
-            <h2>Welcome to the Hamish & Andy Upset Meter!</h2>
-            <p>${pageTitle}</p>
-            <p>Answer the questions with a slider to indicate how upset the scenario makes you. After all the questions, see where you fall on the scale of Fast & Loose (Hamish) to Slow & Tight (Andy).</p>
-            <button id="startQuiz">Start Quiz</button>
-        `;
-        quizContainer.appendChild(titlePageDiv);
-        resultContainer.style.display = 'none'; // Hide the result container initially
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            height: 150px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container"></div>
 
-        // Start quiz when the "Start Quiz" button is clicked
-        document.getElementById("startQuiz").addEventListener('click', function() {
-            currentIndex = 0;
-            renderQuestion();
-        });
-    }
+    <script>
+        const scenarios = [
+            "I never dry my cutlery—just toss it wet into the drawer.",
+            "I top up my car with $5 of petrol at a time.",
+            "I don’t own Tupperware. I just loosely cover leftovers with foil.",
+            "I throw batteries in the regular bin.",
+            "I use my partner’s toothbrush when mine is out of reach.",
+            "I leave the butter out on the counter all week.",
+            "I don’t check expiration dates unless it smells weird.",
+            "I write appointments in pencil... on random bits of paper.",
+            "I use one side of a sponge for a month, then flip it.",
+            "I microwave fish at work."
+        ];
 
-    // Create the question and slider for each scenario
-    function renderQuestion() {
-        quizContainer.innerHTML = ''; // Clear existing content
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'slide';
+        let currentIndex = 0;
+        let scores = Array(scenarios.length).fill(5);
+        const quizContainer = document.getElementById("quiz-container");
 
-        questionDiv.innerHTML = `
-            <p><strong>${currentIndex + 1}.</strong> ${scenarios[currentIndex]}</p>
-            <input type="range" min="0" max="10" value="${scores[currentIndex]}" id="q${currentIndex}" />
-            <span id="val${currentIndex}">${scores[currentIndex]}</span>/10 upset
-            <div style="margin-top: 20px;">
-                <button id="prev" ${currentIndex === 0 ? 'disabled' : ''}>Back</button>
-                ${currentIndex === scenarios.length - 1 ? '<button id="showResultsButton">Show Results</button>' : '<button id="next">Next</button>'}
-            </div>
-        `;
+        function renderTitlePage() {
+            quizContainer.innerHTML = `
+                <div class="slide">
+                    <h2>Welcome to the Hamish & Andy Upset Meter!</h2>
+                    <p>Answer the questions using the slider. After all questions, see where you fall on the scale!</p>
+                    <button id="startQuiz">Start Quiz</button>
+                </div>
+            `;
+            document.getElementById("startQuiz").addEventListener('click', () => {
+                currentIndex = 0;
+                renderQuestion();
+            });
+        }
 
-        quizContainer.appendChild(questionDiv);
+        function renderQuestion() {
+            quizContainer.innerHTML = `
+                <div class="slide">
+                    <p><strong>${currentIndex + 1}.</strong> ${scenarios[currentIndex]}</p>
+                    <div class="slider-container">
+                        <span>😎 Fast & Loose</span>
+                        <input type="range" min="0" max="10" value="${scores[currentIndex]}" id="q${currentIndex}" />
+                        <span>📏 Slow & Tight</span>
+                    </div>
+                    <span id="val${currentIndex}">${scores[currentIndex]}</span>/10 upset
+                    <div style="margin-top: 20px;">
+                        <button id="prev" ${currentIndex === 0 ? 'disabled' : ''}>Back</button>
+                        ${currentIndex === scenarios.length - 1 ? '<button id="showResultsButton">Show Results</button>' : '<button id="next">Next</button>'}
+                    </div>
+                </div>
+            `;
 
-        // Update value on slider change
-        const slider = document.getElementById(`q${currentIndex}`);
-        const valueDisplay = document.getElementById(`val${currentIndex}`);
-        slider.addEventListener('input', function() {
-            valueDisplay.innerText = this.value;
-            scores[currentIndex] = parseInt(this.value);
-        });
+            document.getElementById(`q${currentIndex}`).addEventListener('input', function () {
+                document.getElementById(`val${currentIndex}`).innerText = this.value;
+                scores[currentIndex] = parseInt(this.value);
+            });
 
-        // Button click handlers for navigating questions
-        const prevButton = document.getElementById('prev');
-        if (prevButton) {
-            prevButton.addEventListener('click', function() {
+            document.getElementById('prev')?.addEventListener('click', () => {
                 if (currentIndex > 0) {
                     currentIndex--;
                     renderQuestion();
                 }
             });
-        }
 
-        const nextButton = document.getElementById('next');
-        if (nextButton) {
-            nextButton.addEventListener('click', function() {
+            document.getElementById('next')?.addEventListener('click', () => {
                 if (currentIndex < scenarios.length - 1) {
                     currentIndex++;
                     renderQuestion();
-                } else {
-                    // This part is now handled directly in the HTML
                 }
             });
+
+            document.getElementById('showResultsButton')?.addEventListener('click', showResult);
         }
 
-        const showResultsButtonElement = document.getElementById('showResultsButton');
-        if (showResultsButtonElement) {
-            showResultsButtonElement.addEventListener('click', function() {
-                showResult();
-            });
-        }
-    }
+        function showResult() {
+            quizContainer.innerHTML = `
+                <div class="slide">
+                    <h2>Your Score on the Upset Meter</h2>
+                    <div class="chart-container">
+                        <canvas id="spectrumChart"></canvas>
+                    </div>
+                </div>
+            `;
 
-    // Function to show the result (calculate average and display on the spectrum chart)
-    function showResult() {
-        quizContainer.innerHTML = ''; // Clear the question content
-        resultContainer.style.display = 'block'; // Show the result container
+            setTimeout(() => {
+                const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                const ctx = document.getElementById("spectrumChart").getContext('2d');
 
-        // Calculate the average score
-        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                if (Chart.getChart("spectrumChart")) {
+                    Chart.getChart("spectrumChart").destroy();
+                }
 
-        // Explicitly set the canvas size for proper rendering
-        chartCanvas.width = 500; // Set the width explicitly
-        chartCanvas.height = 200; // Set the height explicitly
-
-        // Get the context of the canvas where the chart will be rendered
-        const ctx = chartCanvas.getContext('2d');
-
-        // Clear the canvas before rendering
-        ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-
-        // Create the chart
-        new Chart(ctx, {
-            type: 'scatter',  // Scatter chart for plotting a point
-            data: {
-                datasets: [{
-                    label: 'You are here →',
-                    data: [{ x: avg, y: 0 }], // Position the point on the x-axis based on average score
-                    backgroundColor: '#E74C3C',  // Red color for the point
-                    pointRadius: 8  // Size of the point
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // Allow the chart to fill the canvas
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        min: 0,
-                        max: 10,
-                        title: {
-                            display: true,
-                            text: 'Not upset at all ← → Ferociously upset'
-                        },
-                        ticks: {
-                            stepSize: 1
-                        }
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'You are here →',
+                            data: [{ x: avg, y: 0 }],
+                            backgroundColor: '#E74C3C',
+                            pointRadius: 10
+                        }]
                     },
-                    y: {
-                        display: false,  // Hide the y-axis
-                        min: -1,
-                        max: 1
+                    options: {
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutBounce'
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                min: 0,
+                                max: 10,
+                                grid: { display: false },
+                                title: {
+                                    display: true,
+                                    text: '😎 Fast & Loose ←→ 📏 Slow & Tight',
+                                    font: { size: 14 }
+                                },
+                                ticks: { display: true, stepSize: 1 }
+                            },
+                            y: { display: false }
+                        },
+                        plugins: { legend: { display: false } }
                     }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `Score: ${ctx.raw.x.toFixed(1)}`
-                        }
-                    }
-                }
-            }
-        });
-    }
+                });
+            }, 100);
+        }
 
-    // Initialize the title page
-    renderTitlePage();
-</script>
-
-<style>
-    /* General Page Styling */
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #A2DFF7; /* Light blue background */
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center; /* Center horizontally */
-        align-items: center;    /* Center vertically */
-        min-height: 100vh; /* Ensure full viewport height */
-        text-align: center;
-    }
-
-    #quiz-container {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        width: 80%;
-        max-width: 600px;
-        display: flex;
-        flex-direction: column;  /* Stack elements vertically */
-        align-items: center;     /* Center items horizontally within the container */
-    }
-
-    /* Title page slide styling */
-    .slide {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center; /* Center text within the slide */
-        width: 100%; /* Ensure the slide takes full width of the container */
-    }
-
-    h2 {
-        font-size: 24px;
-        color: #333;
-        margin-bottom: 10px;
-    }
-
-    p {
-        font-size: 16px;
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    input[type="range"] {
-        width: 350px;  /* Slightly wider slider */
-        margin: 10px 0;
-        position: relative;
-    }
-
-    span {
-        font-weight: bold;
-    }
-
-    button {
-        background-color: #E74C3C;
-        color: white;
-        font-size: 16px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 20px;
-    }
-
-    button:hover {
-        background-color: #c0392b;
-    }
-
-    input[type="range"]::before {
-        content: "Not upset at all";
-        position: absolute;
-        left: 0;
-        top: -20px;
-        color: #333;
-        font-size: 14px;
-    }
-
-    input[type="range"]::after {
-        content: "Ferociously upset";
-        position: absolute;
-        right: 0;
-        top: -20px;
-        color: #333;
-        font-size: 14px;
-    }
-
-    /* Styling the result section */
-    #result {
-        margin-top: 30px;
-        text-align: center; /* Center the chart canvas */
-        display: none; /* Initially hidden */
-    }
-
-    #spectrumChart {
-        width: 100%; /* Make the chart responsive within its container */
-        max-width: 400px; /* Maintain a maximum width */
-        height: 200px; /* Provide height for the canvas */
-    }
-</style>
+        renderTitlePage();
+    </script>
+</body>
+</html>
