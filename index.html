@@ -1,7 +1,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 
 <div id="quiz-container">
-    <div id="result" style="margin-top: 20px;">
+    <div id="result" style="margin-top: 20px; display: none;">
         <canvas id="spectrumChart" width="400" height="100"></canvas>
     </div>
 </div>
@@ -266,12 +266,12 @@
     #result {
         margin-top: 30px;
         text-align: center; /* Center the chart canvas */
-        display: none; /* Initially hidden */
+        display: block; /* Ensure it's visible when the result is shown */
     }
 
     #spectrumChart {
         width: 100%; /* Make the chart responsive within its container */
         max-width: 400px; /* Maintain a maximum width */
-        height: auto; /* Maintain aspect ratio */
+        height: 200px; /* Provide height for the canvas */
     }
 </style>
