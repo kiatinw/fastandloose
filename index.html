@@ -2,216 +2,573 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hamish & Andy Upset Meter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
     <style>
+        :root {
+            --sky: #A2DFF7;
+            --red: #E74C3C;
+            --red-dark: #c0392b;
+            --yellow: #F9C74F;
+            --green: #57CC99;
+            --white: #ffffff;
+            --text: #1a1a2e;
+            --muted: #666;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #A2DFF7;
-            margin: 0;
-            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background: var(--sky);
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,0.45) 0%, transparent 35%),
+                radial-gradient(circle at 85% 75%, rgba(255,200,100,0.2) 0%, transparent 40%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            text-align: center;
+            padding: 20px;
         }
 
         #quiz-container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-bottom: 20px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 620px;
+            overflow: hidden;
+            position: relative;
         }
 
-        .slide {
+        /* Header strip */
+        .header-strip {
+            background: var(--red);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .header-strip .logo {
+            font-family: 'Boogaloo', cursive;
+            color: white;
+            font-size: 1.35rem;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+        .header-strip .logo span {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            display: block;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .mic-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+            padding: 0 28px;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .progress-bar-track {
+            height: 6px;
+            background: #eee;
+            border-radius: 99px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--red), var(--yellow));
+            border-radius: 99px;
+            transition: width 0.4s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* Slide content */
+        .slide-content {
+            padding: 32px 28px 28px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            width: 100%;
+            min-height: 280px;
+            animation: fadeUp 0.35s ease both;
         }
 
-        button {
-            background-color: #E74C3C;
-            color: white;
-            font-size: 16px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        button:hover {
-            background-color: #c0392b;
+        /* Title page */
+        .title-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+            animation: wobble 2s infinite ease-in-out;
         }
-
-        input[type="range"] {
-            width: 525px;
-            margin: 10px 0;
+        @keyframes wobble {
+            0%,100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
         }
-
-        .slider-container {
+        .title-main {
+            font-family: 'Boogaloo', cursive;
+            font-size: 2.4rem;
+            color: var(--red);
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+        .title-sub {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 400px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .spectrum-label {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 550px;
+            gap: 24px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text);
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-bottom: 24px;
+        }
+        .spectrum-label span { display: flex; align-items: center; gap: 6px; }
+
+        /* Question */
+        .q-number {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--red);
+            margin-bottom: 8px;
+        }
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.45;
+            max-width: 480px;
+            margin-bottom: 32px;
         }
 
-        .chart-container {
+        /* Slider */
+        .slider-area {
             width: 100%;
             max-width: 500px;
-            height: 150px;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 99px;
+            outline: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 2px 8px rgba(231,76,60,0.4);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .slider-value {
+            font-family: 'Boogaloo', cursive;
+            font-size: 2rem;
+            color: var(--red);
+            margin-bottom: 4px;
+        }
+        .slider-mood {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--muted);
+            min-height: 24px;
+            transition: all 0.2s;
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            justify-content: center;
+        }
+        .btn {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.12s, box-shadow 0.12s;
+            letter-spacing: 0.3px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: var(--red); color: white; }
+        .btn-primary:hover { background: var(--red-dark); }
+        .btn-secondary { background: #f0f0f0; color: #555; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .btn:disabled { opacity: 0.35; cursor: default; transform: none; box-shadow: none; }
+
+        /* Result page */
+        .result-score-big {
+            font-family: 'Boogaloo', cursive;
+            font-size: 5rem;
+            line-height: 1;
+            color: var(--red);
+        }
+        .result-label {
+            font-family: 'Boogaloo', cursive;
+            font-size: 1.8rem;
+            color: var(--text);
+            margin: 4px 0 8px;
+        }
+        .result-desc {
+            font-size: 0.95rem;
+            color: var(--muted);
+            max-width: 400px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 480px;
+            height: 120px;
             position: relative;
+            margin-bottom: 16px;
+        }
+        .result-breakdown {
+            width: 100%;
+            max-width: 480px;
+            background: #fafafa;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .result-breakdown h4 {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 7px;
+            font-size: 0.82rem;
+        }
+        .breakdown-item:last-child { margin-bottom: 0; }
+        .breakdown-item .b-label {
+            flex: 1;
+            color: #444;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .breakdown-item .b-bar-track {
+            width: 100px;
+            height: 6px;
+            background: #e8e8e8;
+            border-radius: 99px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .breakdown-item .b-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+        }
+        .breakdown-item .b-val {
+            font-weight: 800;
+            color: var(--text);
+            width: 20px;
+            text-align: right;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
-    <div id="quiz-container"></div>
+<div id="quiz-container"></div>
 
-    <script>
-        const scenarios = [
-            "I never dry my cutlery—just toss it wet into the drawer.",
-            "I never fill my fuel tank to full, I just stop when I'm bored.",
-            "I throw batteries in the regular bin.",
-            "I use my partner’s toothbrush when mine is out of reach.",
-            "I leave the butter out on the counter all week.",
-            "I don’t check expiration dates unless it smells weird.",
-            "I let gravity shut the fuel cap on my car after filling up.",
-            "I don't wait for clothes to dry; they'll dry whilst I'm wearing them.",
-            "I don't bother locking my phone or switching off the screen before I put it in my pocket.",
-            "I hard boil my eggs in the kettle.",
-            "I have two clocks in my car - one on daylight savings time and the other on normal time.",
-            "I don't waste time rolling up cables - just bundle them up in a clump.",
-            "I don't bother wiping - just jump straight in the shower.",
-            "Instead of reading a book from start to finish, I just open it up to a random chapter and pick up the action.",
-            "If I sell a storage unit on Facebook Marketplace, I don't bother emptying it before handing it over.",
-            "I don't bother making a new note on my phone for a new topic - just add it to the existing one."
-            
-        ];
+<script>
+const scenarios = [
+    { text: "I never dry my cutlery — just toss it wet into the drawer.", emoji: "🍴" },
+    { text: "I never fill my fuel tank to full. I just stop when I'm bored.", emoji: "⛽" },
+    { text: "I throw batteries in the regular bin.", emoji: "🔋" },
+    { text: "I use my partner's toothbrush when mine is out of reach.", emoji: "🪥" },
+    { text: "I leave the butter out on the counter all week.", emoji: "🧈" },
+    { text: "I don't check expiration dates unless it smells weird.", emoji: "🤔" },
+    { text: "I let gravity shut the fuel cap on my car after filling up.", emoji: "🚗" },
+    { text: "I don't wait for clothes to dry — they'll dry whilst I'm wearing them.", emoji: "👕" },
+    { text: "I don't bother locking my phone or switching off the screen before I put it in my pocket.", emoji: "📱" },
+    { text: "I hard boil my eggs in the kettle.", emoji: "🥚" },
+    { text: "I have two clocks in my car — one on daylight savings and one on normal time.", emoji: "🕐" },
+    { text: "I don't waste time rolling up cables — just bundle them in a clump.", emoji: "🔌" },
+    { text: "I don't bother wiping — just jump straight in the shower.", emoji: "🚿" },
+    { text: "Instead of reading front to back, I open a book to a random chapter and pick up the action.", emoji: "📖" },
+    { text: "If I sell a storage unit on Facebook Marketplace, I don't bother emptying it before handing it over.", emoji: "📦" },
+    { text: "I don't bother making a new note for a new topic — just add it to the existing one.", emoji: "📝" },
+];
 
-        let currentIndex = 0;
-        let scores = Array(scenarios.length).fill(5);
-        const quizContainer = document.getElementById("quiz-container");
+const PERSONAS = [
+    { max: 2,  label: "Absolute Chaos Agent 🔥",     desc: "You are thriving in anarchy. Rules are merely suggestions. Hamish would not cope." },
+    { max: 4,  label: "Casual Rule Bender 😎",        desc: "You take a relaxed approach to life's finer conventions. And honestly? Fair enough." },
+    { max: 6,  label: "Situationally Principled 🤷",  desc: "You pick your battles. Some things matter, some don't — and you know which is which." },
+    { max: 8,  label: "Quietly Uptight 📐",            desc: "You notice these things. You might not say anything. But you notice." },
+    { max: 10, label: "Full Andy Lassner Energy 😤",   desc: "You have strong opinions about cutlery drying. The wet drawer haunts you. You are not okay." },
+];
 
-        function renderTitlePage() {
-            quizContainer.innerHTML = `
-                <div class="slide">
-                    <h2>Welcome to the Hamish & Andy Upset Meter!</h2>
-                    <p>Answer the questions using the slider. After all questions, see where you fall on the scale!</p>
-                    <button id="startQuiz">Start Quiz</button>
+let currentIndex = 0;
+let scores = Array(scenarios.length).fill(5);
+const container = document.getElementById("quiz-container");
+
+function getSliderBackground(val) {
+    const pct = val * 10;
+    return `linear-gradient(90deg, #E74C3C ${pct}%, #e0e0e0 ${pct}%)`;
+}
+
+function getMood(val) {
+    if (val <= 2) return "Totally unbothered 😴";
+    if (val <= 4) return "Mild eyebrow raise 🙄";
+    if (val <= 6) return "Hmm, not ideal... 😬";
+    if (val <= 8) return "That's not right 😤";
+    return "ABSOLUTELY NOT 😡";
+}
+
+function getPersona(avg) {
+    return PERSONAS.find(p => avg <= p.max) || PERSONAS[PERSONAS.length - 1];
+}
+
+function renderHeader(showProgress) {
+    return `
+        <div class="header-strip">
+            <div class="logo">Hamish &amp; Andy<span>Upset Meter™</span></div>
+            <div class="mic-icon">🎙️</div>
+        </div>
+        ${showProgress ? `
+        <div class="progress-wrap">
+            <div class="progress-info">
+                <span>Question ${currentIndex + 1} of ${scenarios.length}</span>
+                <span>${Math.round(((currentIndex + 1) / scenarios.length) * 100)}% done</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width:${((currentIndex + 1) / scenarios.length) * 100}%"></div>
+            </div>
+        </div>` : ''}
+    `;
+}
+
+function renderTitlePage() {
+    container.innerHTML = `
+        ${renderHeader(false)}
+        <div class="slide-content">
+            <div class="title-emoji">😤</div>
+            <h1 class="title-main">The Upset Meter</h1>
+            <p class="title-sub">How much do life's little quirks bother you? Rate 16 chaotic scenarios and find out where you sit on the spectrum.</p>
+            <div class="spectrum-label">
+                <span>😎 Fast &amp; Loose</span>
+                <span>↔️</span>
+                <span>📏 Slow &amp; Tight</span>
+            </div>
+            <button class="btn btn-primary" id="startBtn">Let's Go 🎙️</button>
+        </div>
+    `;
+    document.getElementById("startBtn").addEventListener("click", () => {
+        currentIndex = 0;
+        renderQuestion();
+    });
+}
+
+function renderQuestion() {
+    const s = scenarios[currentIndex];
+    const val = scores[currentIndex];
+
+    container.innerHTML = `
+        ${renderHeader(true)}
+        <div class="slide-content">
+            <div class="q-number">Scenario ${currentIndex + 1} of ${scenarios.length}</div>
+            <p class="q-text">${s.emoji} "${s.text}"</p>
+            <div class="slider-area">
+                <div class="slider-labels">
+                    <span>😎 Totally fine</span>
+                    <span>😡 Utterly wrong</span>
                 </div>
-            `;
-            document.getElementById("startQuiz").addEventListener('click', () => {
-                currentIndex = 0;
-                renderQuestion();
-            });
-        }
-
-        function renderQuestion() {
-            quizContainer.innerHTML = `
-                <div class="slide">
-                    <p><strong>${currentIndex + 1}.</strong> ${scenarios[currentIndex]}</p>
-                    <div class="slider-container">
-                        <span>😎 Fast & Loose</span>
-                        <input type="range" min="0" max="10" value="${scores[currentIndex]}" id="q${currentIndex}" />
-                        <span>📏 Slow & Tight</span>
-                    </div>
-                    <span id="val${currentIndex}">${scores[currentIndex]}</span>/10 upset
-                    <div style="margin-top: 20px;">
-                        <button id="prev" ${currentIndex === 0 ? 'disabled' : ''}>Back</button>
-                        ${currentIndex === scenarios.length - 1 ? '<button id="showResultsButton">Show Results</button>' : '<button id="next">Next</button>'}
-                    </div>
-                </div>
-            `;
-
-            document.getElementById(`q${currentIndex}`).addEventListener('input', function () {
-                document.getElementById(`val${currentIndex}`).innerText = this.value;
-                scores[currentIndex] = parseInt(this.value);
-            });
-
-            document.getElementById('prev')?.addEventListener('click', () => {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    renderQuestion();
+                <input type="range" min="0" max="10" value="${val}" id="mainSlider" style="background:${getSliderBackground(val)}">
+                <div class="slider-value" id="sliderVal">${val}/10</div>
+                <div class="slider-mood" id="sliderMood">${getMood(val)}</div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" id="prevBtn" ${currentIndex === 0 ? 'disabled' : ''}>← Back</button>
+                ${currentIndex === scenarios.length - 1
+                    ? `<button class="btn btn-primary" id="nextBtn">See Results 🎉</button>`
+                    : `<button class="btn btn-primary" id="nextBtn">Next →</button>`
                 }
-            });
+            </div>
+        </div>
+    `;
 
-            document.getElementById('next')?.addEventListener('click', () => {
-                if (currentIndex < scenarios.length - 1) {
-                    currentIndex++;
-                    renderQuestion();
-                }
-            });
+    const slider = document.getElementById("mainSlider");
+    const valDisplay = document.getElementById("sliderVal");
+    const moodDisplay = document.getElementById("sliderMood");
 
-            document.getElementById('showResultsButton')?.addEventListener('click', showResult);
-        }
+    slider.addEventListener("input", function() {
+        const v = parseInt(this.value);
+        scores[currentIndex] = v;
+        valDisplay.textContent = `${v}/10`;
+        moodDisplay.textContent = getMood(v);
+        this.style.background = getSliderBackground(v);
+    });
 
-        function showResult() {
-            quizContainer.innerHTML = `
-                <div class="slide">
-                    <h2>Your Score on the Upset Meter</h2>
-                    <div class="chart-container">
-                        <canvas id="spectrumChart"></canvas>
+    document.getElementById("prevBtn")?.addEventListener("click", () => {
+        if (currentIndex > 0) { currentIndex--; renderQuestion(); }
+    });
+
+    document.getElementById("nextBtn")?.addEventListener("click", () => {
+        if (currentIndex < scenarios.length - 1) { currentIndex++; renderQuestion(); }
+        else showResult();
+    });
+}
+
+function showResult() {
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const avgRounded = Math.round(avg * 10) / 10;
+    const persona = getPersona(avg);
+
+    // Sort for breakdown - top 5 most upsetting
+    const ranked = scenarios.map((s, i) => ({ text: s.text, emoji: s.emoji, score: scores[i] }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+
+    container.innerHTML = `
+        ${renderHeader(false)}
+        <div class="slide-content">
+            <div class="result-score-big">${avgRounded}</div>
+            <div class="result-label">${persona.label}</div>
+            <p class="result-desc">${persona.desc}</p>
+
+            <div class="chart-container">
+                <canvas id="spectrumChart"></canvas>
+            </div>
+
+            <div class="result-breakdown">
+                <h4>Your 5 Biggest Triggers</h4>
+                ${ranked.map(r => `
+                    <div class="breakdown-item">
+                        <span style="font-size:1.1rem;flex-shrink:0">${r.emoji}</span>
+                        <span class="b-label" title="${r.text}">${r.text.length > 42 ? r.text.slice(0, 42) + '…' : r.text}</span>
+                        <div class="b-bar-track">
+                            <div class="b-bar-fill" style="width:${r.score * 10}%; background: hsl(${120 - r.score * 12}, 75%, 50%)"></div>
+                        </div>
+                        <span class="b-val">${r.score}</span>
                     </div>
-                </div>
-            `;
+                `).join('')}
+            </div>
 
-            setTimeout(() => {
-                const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-                const ctx = document.getElementById("spectrumChart").getContext('2d');
+            <div class="btn-row">
+                <button class="btn btn-secondary" id="retakeBtn">🔄 Retake</button>
+                <button class="btn btn-primary" id="reviewBtn">📋 Review Answers</button>
+            </div>
+        </div>
+    `;
 
-                if (Chart.getChart("spectrumChart")) {
-                    Chart.getChart("spectrumChart").destroy();
-                }
-
-                new Chart(ctx, {
-                    type: 'scatter',
-                    data: {
-                        datasets: [{
-                            label: 'You are here →',
-                            data: [{ x: avg, y: 0 }],
-                            backgroundColor: '#E74C3C',
-                            pointRadius: 10
-                        }]
+    // Draw chart
+    setTimeout(() => {
+        const ctx = document.getElementById("spectrumChart").getContext("2d");
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    data: [{ x: avg, y: 0 }],
+                    backgroundColor: '#E74C3C',
+                    pointRadius: 14,
+                    pointHoverRadius: 16,
+                }]
+            },
+            options: {
+                animation: { duration: 1200, easing: 'easeOutBounce' },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 10,
+                        grid: { color: '#f0f0f0' },
+                        title: {
+                            display: true,
+                            text: '😎 Fast & Loose  ←  Your score: ' + avgRounded + '  →  📏 Slow & Tight',
+                            font: { size: 12, family: 'Nunito', weight: '700' },
+                            color: '#666'
+                        },
+                        ticks: { stepSize: 1, color: '#999', font: { size: 11 } }
                     },
-                    options: {
-                        animation: {
-                            duration: 2000,
-                            easing: 'easeOutBounce'
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                position: 'bottom',
-                                min: 0,
-                                max: 10,
-                                grid: { display: false },
-                                title: {
-                                    display: true,
-                                    text: '😎 Fast & Loose ←→ 📏 Slow & Tight',
-                                    font: { size: 14 }
-                                },
-                                ticks: { display: true, stepSize: 1 }
-                            },
-                            y: { display: false }
-                        },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }, 100);
-        }
+                    y: { display: false }
+                },
+                plugins: { legend: { display: false }, tooltip: { callbacks: {
+                    label: () => `Your average: ${avgRounded}/10`
+                }}}
+            }
+        });
+    }, 100);
 
+    document.getElementById("retakeBtn").addEventListener("click", () => {
+        scores = Array(scenarios.length).fill(5);
+        currentIndex = 0;
         renderTitlePage();
-    </script>
+    });
+
+    document.getElementById("reviewBtn").addEventListener("click", () => {
+        currentIndex = 0;
+        renderQuestion();
+    });
+}
+
+renderTitlePage();
+</script>
 </body>
 </html>
